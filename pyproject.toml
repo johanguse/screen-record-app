@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "screen_record_app"
+version = "0.1.0"
+description = "A screen recording application with webcam and audio capture capabilities"
+authors = ["Your Name <your.email@example.com>"]
+packages = [
+    { include = "screen_record_app" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+PyQt6 = "^6.5.0"
+opencv-contrib-python = "^4.7.0"
+numpy = "^1.24.3"
+mss = "^9.0.1"
+pyaudio = "^0.2.13"
+Pillow = "^9.5.0"
+ffmpeg-python = "^0.2.0"
+opencv-python = "^4.10.0.84"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.3.1"
+black = "^23.3.0"
+flake8 = "^6.0.0"
+
+[tool.poetry.scripts]
+screen_record_app = "screen_record_app.main:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.flake8]
+max-line-length = 100
+exclude = [".venv", ".git", "__pycache__"]
