@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QApplication, QWidget
-from PyQt6.QtCore import QRect, Qt, pyqtSignal
+from PyQt6.QtCore import QRect, Qt, pyqtSignal, QPoint
 from PyQt6.QtGui import QMouseEvent, QColor, QPainter, QPen
 
 class AreaSelector(QWidget):
@@ -43,8 +43,14 @@ class AreaSelector(QWidget):
             
             print(f"Painting selection rect: {selection_rect}")
 
+            # Add size text display
+            painter.setPen(QColor(255, 255, 255))
+            text = f"{selection_rect.width()}x{selection_rect.height()}"
+            painter.drawText(selection_rect.bottomRight() + QPoint(10, 10), text)
+
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.MouseButton.LeftButton:
+            self.setCursor(Qt.CursorShape.CrossCursor)  # Add crosshair cursor
             self.start_point = event.position().toPoint()
             self.current_end_point = self.start_point
             self.update()
@@ -52,23 +58,39 @@ class AreaSelector(QWidget):
 
     def mouseMoveEvent(self, event: QMouseEvent):
         if self.start_point:
-            self.current_end_point = event.position().toPoint()
+            # Constrain to screen boundaries
+            pos = event.position().toPoint()
+            screen_rect = self.geometry()
+            pos.setX(max(min(pos.x(), screen_rect.right()), screen_rect.left()))
+            pos.setY(max(min(pos.y(), screen_rect.bottom()), screen_rect.top()))
+            
+            self.current_end_point = pos
             self.update()
             print(f"Mouse move event: {self.current_end_point}")
 
     def mouseReleaseEvent(self, event: QMouseEvent):
         if event.button() == Qt.MouseButton.LeftButton and self.start_point:
-            end_point = event.position().toPoint()
-            selected_area = QRect(self.start_point, end_point).normalized()
-            global_start = self.mapToGlobal(selected_area.topLeft())
+            # Convert both points to global coordinates
+            global_start = self.mapToGlobal(self.start_point)
+            global_end = self.mapToGlobal(event.position().toPoint())
+            
+            # Create rect from global coordinates
+            selected_area = QRect(global_start, global_end).normalized()
+            
+            if selected_area.width() < 10 or selected_area.height() < 10:
+                print("Selection too small, ignoring")
+                self.close()
+                return
+            
             self.area_selected.emit({
-                "top": global_start.y(),
-                "left": global_start.x(),
+                "top": selected_area.top(),
+                "left": selected_area.left(),
                 "width": selected_area.width(),
                 "height": selected_area.height()
             })
-            print(f"Selected area: {selected_area}")
+            print(f"Selected area: {selected_area.getCoords()}")
             self.close()
+            self.setCursor(Qt.CursorShape.ArrowCursor)  # Restore default cursor
 
     def show(self):
         super().show()
