@@ -14,7 +14,7 @@ opencv-contrib-python = "^4.11.0"
 numpy = "^1.24.3"
 mss = "^9.0.1"
 pyaudio = "^0.2.13"
-Pillow = "^9.5.0"
+Pillow = "^10.3.0"
 ffmpeg-python = "^0.2.0"
 opencv-python = "^4.11.0"
 
