@@ -93,6 +93,11 @@ class CaptureCanvasPro(QMainWindow):
 
     def capture_frame(self):
         frame = self.screen_recorder.capture_frame(force=True)
+        
+        # Overlay webcam if enabled
+        if frame is not None and self.webcam_handler.is_enabled and self.webcam_handler.current_frame is not None:
+            frame = self.webcam_handler.overlay_webcam(frame)
+
         if frame is not None:
             self.frames.append(frame)
             self.update_preview_label(frame)
@@ -114,7 +119,7 @@ class CaptureCanvasPro(QMainWindow):
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(0)
         frames = list(self.frames)
-        audio_data = self.audio_recorder.get_audio_data()
+        audio_data = self.audio_recorder.get_audio_data() if self.recording_controls.audio_checkbox.isChecked() else b''
         enhance = True  # or False, based on user preference
         self.video_exporter.start_export(frames, audio_data, output_format, enhance)
 

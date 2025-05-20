@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QComboBox
+from PyQt6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QComboBox, QCheckBox
 from PyQt6.QtCore import pyqtSignal
 from screen_record_app.recording.area_selector import AreaSelector
 
@@ -35,6 +35,10 @@ class RecordingControls(QWidget):
         self.monitor_combo.currentIndexChanged.connect(self.select_monitor)
         layout.addWidget(self.monitor_combo)
 
+        self.audio_checkbox = QCheckBox('Enable Audio Recording', self)
+        self.audio_checkbox.setChecked(True)
+        layout.addWidget(self.audio_checkbox)
+
         self.setLayout(layout)
 
     def toggle_recording(self):
@@ -50,6 +54,9 @@ class RecordingControls(QWidget):
         self.area_select_button.setEnabled(False)
         self.monitor_combo.setEnabled(False)
         self.parent.update_status('Recording...')
+        if self.audio_checkbox.isChecked():
+            self.parent.audio_recorder.clear_audio_data()  # Clear previous audio data
+            self.parent.audio_recorder.start()  # Start audio recording
         self.parent.screen_recorder.start_recording()
         self.parent.timer.start(33)  # Start the frame capture timer
         self.recording_started.emit()
@@ -62,6 +69,9 @@ class RecordingControls(QWidget):
         self.monitor_combo.setEnabled(True)
         self.parent.update_status('Recording stopped')
         self.parent.screen_recorder.stop_recording()
+        if self.audio_checkbox.isChecked(): # Check if audio recording was intended
+            self.parent.audio_recorder.stop()  # Stop audio recording
+            self.parent.audio_recorder.wait()  # Wait for audio thread to finish
         self.parent.timer.stop()
         self.parent.start_preview()  # Restart preview
         self.recording_stopped.emit()
