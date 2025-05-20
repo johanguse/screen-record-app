@@ -32,3 +32,13 @@ class AudioRecorder(QThread):
 
     def stop(self):
         self.is_recording = False
+
+    def get_audio_data(self):
+        """Joins all collected audio byte chunks, clears the list, and returns the joined data."""
+        joined_data = b''.join(self.audio_data)
+        self.clear_audio_data()
+        return joined_data
+
+    def clear_audio_data(self):
+        """Resets the audio_data list to empty."""
+        self.audio_data = []
